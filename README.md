@@ -1,2 +1,2 @@
 # python1
-print('Aaaaaaaaaaaaaaa')
+10
