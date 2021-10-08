@@ -1,4 +1,3 @@
-
 #Краткая документация:
 #Данная программа рисует статичную картину: 4 бамбука и 2 панды
 #Рисование бамбука оформлено в виде отдельной функции, что позволяет нарисовать сколько угодно бамбука
@@ -19,7 +18,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 YELLOW=(255,255,0)
 
-FPS = 30 #FPS, в данной программе рисунок статичен
+FPS = 60 #FPS, в данной программе рисунок статичен
 PI = math.pi #Пи
 W, H = 750, 500 #Ширина и высота главного окна
 
@@ -192,27 +191,31 @@ finished = False
 while not finished:
     clock.tick(FPS)
     for event in pygame.event.get():
+        print(event)
         if event.type == pygame.QUIT:
             finished = True
-        if event.type == pygame.K_DOWN:
-            if (leaf_2_1 < 490):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+             if (leaf_2_1 < 590):
                 leaf_2_1 += 10
+                rect(screen, (255, 177, 129), (0, 0, W, H))
                 forest()
-            if (leaf_3_1 < 490):
+                panda()
+             if (leaf_3_1 < 590):
                 leaf_3_1 += 10
                 forest()
-            if (leaf_2_2 < 490):
+             if (leaf_2_2 < 590):
                 leaf_2_2 += 10
                 forest()
-            if (leaf_3_2 < 490):
+             if (leaf_3_2 < 490):
                 leaf_3_2 += 10
                 forest()
-            if (leaf_4_2 < 490):
+             if (leaf_4_2 < 590):
                 leaf_4_2 += 10
                 forest()
-            if (leaf_5_2 < 490):
+             if (leaf_5_2 < 590):
                 leaf_5_2 += 10
                 forest()
-    pygame.display.update()
+            pygame.display.update()
 
 pygame.quit()
