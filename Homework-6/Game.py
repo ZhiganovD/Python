@@ -36,7 +36,7 @@ def new_ball(): #рисует шарик
     x = randint(50, 650) #он рандомен по х
     y = randint(50, 650) #и по у
     r = randint(10, 50) #и даже по r
-    p = 10
+    p = 10 #очки за него
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
 
@@ -44,9 +44,9 @@ def snitch(): #а вот и козырь
     global x, y, w, h, color, p
     x = randint(50, 650) #он рандомен по х
     y = randint(50, 650) #и по у
-    w = randint(10, 50) #и даже по r
-    h = randint (10, 50)
-    p = 500
+    w = randint(10, 50) #и даже по w
+    h = randint (10, 50) #и по h
+    p = 500 #очки за него
     color = BLACK
     rect(screen, color, (x, y, w, h))
 
