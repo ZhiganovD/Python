@@ -263,12 +263,10 @@ for i in range(0, top - 1): #добавление нового элемента 
  if(point >= rec[0]):
       for j in range(top - 1, 0, -1):
           win[j] = win[j - 1]
-          p[j] = pts[j - 1]
+          pts[j] = pts[j - 1]
       win[0] = a
       pts[0] = level
       break
-for i in range(0,5):
-    print(win[i] + ' ' + pts[i])
 f = open('winners.txt', 'w') #открыть файл
 for i in range(0, top): #sacred Jedi texts!
     f.write(win[i] + ' ' + pts[i])
