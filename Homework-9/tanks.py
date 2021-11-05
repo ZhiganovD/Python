@@ -99,6 +99,19 @@ class Ball:
             return True
         else:
             return False
+    
+    def hittest_c(self, obj):
+        """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
+
+        Args:
+            obj: Обьект, с которым проверяется столкновение.
+        Returns:
+            Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
+        """
+        if (np.sqrt((self.x - obj.x) ** 2 + (self.y - obj.y) ** 2) <= self.r + obj.a):
+            return True
+        else:
+            return False
 
 class Bomb:
     def __init__(self, screen: pygame.Surface, x=40, y=450):
@@ -160,7 +173,7 @@ class Bomb:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        if (np.sqrt((self.x - obj.x) ** 2 + (self.y - obj.y) ** 2) <= self.r + obj.r):
+        if (np.sqrt((self.x - (obj.x + obj.a)) ** 2 + (self.y - (obj.y + obj.a)) ** 2) <= self.r + obj.r):
             return True
         else:
             return False
@@ -279,7 +292,7 @@ class Target:
 
     def new_target(self):
         """ Инициализация новой цели. """
-        global enemies, enemy, UFO_1x, UFO_2x, UFO_y, cords
+        global UFO_1x, UFO_2x, UFO_y, cords
         self.live = 1
         self.points = 0
         self.vy = randint(1, 4)
@@ -305,6 +318,43 @@ class Target:
             self.r = 0
             self.new_target()
         self.y += self.vy
+
+class Cargo:
+    def __init__(self, screen):
+        self.screen = screen
+        self.new_target()
+
+    def new_target(self):
+        """ Инициализация новой цели. """
+        global UFO_1x, UFO_2x, UFO_y, cords
+        self.live = 1
+        self.points = 0
+        self.vy = randint(1, 4)
+        self.x = choice(cords)
+        self.y = UFO_y + 42.5
+        self.a = randint(20, 25)
+        self.color = BLACK
+        #self.draw()
+
+    def hit(self, points=5):
+        """Попадание шарика в цель."""
+        self.points += points
+
+    def draw(self):
+     pygame.draw.rect(
+            self.screen,
+            self.color,
+            (self.x - self.a, self.y, self.a, self.a),
+      )
+    def move(self):
+        if ( self.y > 635):
+            self.r = 0
+            self.new_target()
+        k = 1.01
+        self.y += self.vy
+        self.vy = k * self.vy
+
+
 def UFO (x, y):
     pygame.draw.ellipse(
         screen,
@@ -324,7 +374,9 @@ bullet = 0
 balls = []
 tanks = []
 enemies = []
+cargoes = []
 enemy = 4
+cargo = 3
 tank = 2
 points = 0
 UFO_1x = 200
@@ -333,10 +385,14 @@ UFO_y = -25
 cords = [UFO_1x + 100, UFO_2x + 100]
 
 clock = pygame.time.Clock()
+
 for i in range(0, enemy):
  new_enemy = Target(screen)
  enemies.append(new_enemy)
-finished = False
+
+for i in range(0, cargo):
+ new_cargo = Cargo(screen)
+ cargoes.append(new_cargo)
 
 for i in range(0, tank):
  new_tank = Gun(screen, i)
@@ -359,6 +415,9 @@ while not finished:
         a.draw()
     for c in tanks:
         c.draw()
+    for d in cargoes:
+        d.draw()
+    
     textsurface = myfont.render('Points:', False, (0, 0, 0))  #надпись в углу экрана
     level = str(points) #перевод данных об очках в строку для вывода на экран
     textsurface1 = myfont.render(level, False, (0, 0, 0))
@@ -405,10 +464,19 @@ while not finished:
                a.hit()
                points += a.points
                a.new_target()
+        for d in cargoes:
+           if b.hittest_c(d) and d.live and b.live > 0:
+               d.live = 0
+               d.hit()
+               points += d.points
+               d.new_target()
     
     for a in enemies:
         a.move()
     
+    for d in cargoes:
+        d.move()
+
     for c in tanks:
         c.power_up()
 
