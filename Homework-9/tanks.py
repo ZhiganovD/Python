@@ -10,17 +10,20 @@ pygame.font.init() #для надписей
 myfont = pygame.font.SysFont('Comic Sans MS', 30) #шрифты для надписи
 
 
-FPS = 40
+FPS = 30
 
 RED = 0xFF0000
+RED2 = pygame.Color(255, 0, 0, 255)
 BLUE = 0x0000FF
 YELLOW = 0xFFC91F
 GREEN = 0x00FF00
 MAGENTA = 0xFF03B8
 CYAN = 0x00FFCC
 BLACK = (0, 0, 0)
+BLACK2 = pygame.Color(0, 0, 0, 255)
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
+
 GAME_COLORS = [RED, BLUE, YELLOW, MAGENTA]
 
 WIDTH = 800
@@ -173,7 +176,20 @@ class Bomb:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        if (np.sqrt((self.x - (obj.x + obj.a)) ** 2 + (self.y - (obj.y + obj.a)) ** 2) <= self.r + obj.r):
+        if (np.sqrt((self.x - (obj.x + obj.r)) ** 2 + (self.y - (obj.y + obj.r)) ** 2) <= self.r + obj.r):
+            return True
+        else:
+            return False
+
+    def hittest_c(self, obj):
+        """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
+
+        Args:
+            obj: Обьект, с которым проверяется столкновение.
+        Returns:
+            Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
+        """
+        if (np.sqrt((self.x - obj.x) ** 2 + (self.y - obj.y) ** 2) <= self.r + obj.a):
             return True
         else:
             return False
@@ -182,7 +198,7 @@ class Bomb:
 class Gun:
     def __init__(self, screen, number):
         self.screen = screen
-        self.f2_power = 30
+        self.f2_power = 70
         self.f2_on = 0
         self.x = randint(40, 500)
         self.y = 530
@@ -191,7 +207,7 @@ class Gun:
         self.r = 30
         self.an = 1
         self.vx = 5
-        self.color = GREY
+        self.color = BLACK2
         self.an2 = 0
         self.number = number
 
@@ -215,7 +231,7 @@ class Gun:
         new_ball.y = self.y - 10
         balls.append(new_ball)
         self.f2_on = 0
-        self.f2_power = 30
+        self.f2_power = 70
     
     def fire2_end_bombs(self, event):
         """Выстрел бомбой (не тот, что из ДМБ).
@@ -234,27 +250,28 @@ class Gun:
         new_bomb.y = self.y - 10
         balls.append(new_bomb)
         self.f2_on = 0
-        self.f2_power = 30
+        self.f2_power = 70
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
         if event and event.pos[0] - 20 != 0:
-            self.an = math.atan((event.pos[1]-450) / (event.pos[0]-20))
-            self.an2 = -int(round(self.an * 180 / np.pi)) 
+            self.an = -math.atan((event.pos[1]-450) / (event.pos[0]-20))
+            if self.an < np.pi * 0.5 and self.an >= 0:
+             self.an2 = (self.an * 180 / np.pi) 
         if self.f2_on:
-            self.color = RED
+            self.color = RED2
         else:
-            self.color = GREY
+            self.color = BLACK2
 
     def draw(self):
-        surface = pygame.Surface([100, 10])
+        surface = pygame.Surface([100, 100], pygame.SRCALPHA)
         #surface.fill(WHITE)
         pygame.draw.rect(
             surface,
             self.color,
-            (0, 0, self.f2_power, 10)
+            (50, 0, self.f2_power, 10)
         )
-        surface = options(self.x + 50, self.y - 10, self.an2, surface, self.screen)
+        surface = options(self.x + 10, self.y - 30, self.an2, surface, self.screen)
         pygame.draw.rect(
             self.screen,
             BLACK,
@@ -280,9 +297,9 @@ class Gun:
         if self.f2_on:
             if self.f2_power < 100:
                 self.f2_power += 1
-            self.color = RED
+            self.color = RED2
         else:
-            self.color = GREY
+            self.color = BLACK2#GREY
 
 
 class Target:
@@ -430,21 +447,21 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            x = randint(0, 1)
             for c in tanks:
                 if event.button == 1 and c.number:
                     c.fire2_start(event)
                 elif event.button == 3 and (c.number == 0):
                     c.fire2_start(event)
         elif event.type == pygame.MOUSEBUTTONUP:
-            x = randint(0, 1)
             for c in tanks:
-              if x and event.button == 1 and c.number:
+              if x and event.button == 1 and (c.number == 1):
                    c.fire2_end_balls(event)
-              elif (-1) * x and event.button == 1 and c.number:
+              elif x == 0 and event.button == 1 and (c.number == 1):
                    c.fire2_end_bombs(event)
-              if x and event.button == 3 and (c.number == 0):
+              elif x and event.button == 3 and (c.number == 0):
                    c.fire2_end_balls(event)
-              elif (-1) * x and event.button == 3 and (c.number == 0):
+              elif x == 0 and event.button == 3 and (c.number == 0):
                    c.fire2_end_bombs(event)
         elif event.type == pygame.MOUSEMOTION:
             for c in tanks:
