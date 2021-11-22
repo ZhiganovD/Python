@@ -19,7 +19,7 @@ screen = pygame.display.set_mode((SH.a_sc, SH.b_sc)) #создание экра�
 
 
 class HeavObj:
-    def __init__(self, x, y, Vx, Vy, radius, mass, color, screen):
+    def __init__(self, x, y, Vx, Vy, radius, mass, color, screen, type):
         self.x = x
         self.y = y
         self.Vx = Vx
@@ -28,24 +28,34 @@ class HeavObj:
         self.r = radius
         self.m = mass
         self.screen = screen
+        self.type = type
     
     def move (self, m, x, y):
         l = lenght (x, y, self.x, self.y)
         a = SH.G * m / (l ** 2)
         V = np.sqrt (a * l)
-        if self.y > y :
-         self.Vx = V * (np.abs(y - self.y) / l)
-        elif self.y <= y :
-         self.Vx =(-1) * V * (np.abs(y - self.y) / l)
-        if self.x < x :
-         self.Vy = V * (np.abs(x - self.x) / l)
-        elif self.x > x :
-         self.Vy =(-1) * V * (np.abs(x - self.x) / l)
+        self.Vy += a * ((y - self.y) / l)
+        self.Vx += a * ((x - self.x) / l)
         self.x += self.Vx
         self.y += self.Vy
 
-    def move_start (self):
-        self.x += self.Vx
+    def hit( self, x, y, r, type, m):
+        l = lenght (x, y, self.x, self.y)
+        if l < r + self.r:
+            if type < self.type:
+                self.r = 0
+                return 0
+            elif type == self.type:
+                if m <= self.m:
+                    self.m += m
+                    self.r += r
+                    return 1
+                else:
+                    return 2
+            else:
+                self.m += m
+                self.r += r
+                return 1
 
     def draw (self):
         pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.r )
@@ -102,12 +112,12 @@ pygame.init()
 
 stars = []
 for i in range(0, SH.star_num):
-    new_star = HeavObj(SH.sun_x, SH.sun_y, SH.sun_Vx, SH.sun_Vy, SH.sun_r, SH.sun_m, SH.sun_c, screen)
+    new_star = HeavObj(SH.sun_x, SH.sun_y, SH.sun_Vx, SH.sun_Vy, SH.sun_r, SH.sun_m, SH.sun_c, screen, SH.sun_type)
     stars.append(new_star)
 
 planets = []
 for i in range(0, SH.planet_num):
-    new_planet = HeavObj(SH.e_x, SH.e_y, SH.e_Vx, SH.e_Vy, SH.e_r, SH.e_m, SH.e_c, screen)
+    new_planet = HeavObj(SH.par[i][0], SH.par[i][1], SH.par[i][2], SH.par[i][3], SH.par[i][4], SH.par[i][5], SH.par[i][6], screen, SH.par[i][7])
     planets.append(new_planet)
 
 while not finished:
@@ -128,5 +138,17 @@ while not finished:
     
     for b in planets:
         b.move(SH.sun_m, SH.sun_x, SH.sun_y)
+
+    for b in planets:
+        for a in stars:
+            if b.hit(a.x, a.y, a.r, a.type, a.m) == 0:
+                a.m += b.m
+            elif b.hit(a.x, a.y, a.r, a.type, a.m) == 1:
+                a.r = 0
+            elif b.hit(a.x, a.y, a.r, a.type, a.m) == 2:
+                a.r += b.r
+                a.m += b.m
+                b.r = 0
+
 
 pygame.quit()
